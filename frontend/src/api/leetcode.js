@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000/api/leetcode";
+const API_URL = "http://leettracker-production-6e83.up.railway.app";
 
 export const fetchProblems = async ({
   skip = 0,
