@@ -1,130 +1,87 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import GenerateForm from "../components/GenerateForm";
 import GeneratedSheet from "../components/GeneratedSheet";
-
-const mockProblems = [
-  {
-    id: 1,
-    title: "Two Sum",
-    difficulty: "Easy",
-    topic: "Array",
-    link: "https://leetcode.com/problems/two-sum/",
-  },
-  {
-    id: 20,
-    title: "Valid Parentheses",
-    difficulty: "Easy",
-    topic: "Stack",
-    link: "https://leetcode.com/problems/valid-parentheses/",
-  },
-  {
-    id: 704,
-    title: "Binary Search",
-    difficulty: "Easy",
-    topic: "Binary Search",
-    link: "https://leetcode.com/problems/binary-search/",
-  },
-  {
-    id: 121,
-    title: "Best Time to Buy and Sell Stock",
-    difficulty: "Easy",
-    topic: "Array",
-    link: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
-  },
-  {
-    id: 322,
-    title: "Coin Change",
-    difficulty: "Medium",
-    topic: "Dynamic Programming",
-    link: "https://leetcode.com/problems/coin-change/",
-  },
-  {
-    id: 200,
-    title: "Number of Islands",
-    difficulty: "Medium",
-    topic: "Graph",
-    link: "https://leetcode.com/problems/number-of-islands/",
-  },
-  {
-    id: 3,
-    title: "Longest Substring Without Repeating Characters",
-    difficulty: "Medium",
-    topic: "Sliding Window",
-    link: "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
-  },
-  {
-    id: 98,
-    title: "Validate Binary Search Tree",
-    difficulty: "Medium",
-    topic: "Tree",
-    link: "https://leetcode.com/problems/validate-binary-search-tree/",
-  },
-  {
-    id: 55,
-    title: "Jump Game",
-    difficulty: "Medium",
-    topic: "Greedy",
-    link: "https://leetcode.com/problems/jump-game/",
-  },
-  {
-    id: 4,
-    title: "Median of Two Sorted Arrays",
-    difficulty: "Hard",
-    topic: "Binary Search",
-    link: "https://leetcode.com/problems/median-of-two-sorted-arrays/",
-  },
-  {
-    id: 42,
-    title: "Trapping Rain Water",
-    difficulty: "Hard",
-    topic: "Array",
-    link: "https://leetcode.com/problems/trapping-rain-water/",
-  },
-  {
-    id: 124,
-    title: "Binary Tree Maximum Path Sum",
-    difficulty: "Hard",
-    topic: "Tree",
-    link: "https://leetcode.com/problems/binary-tree-maximum-path-sum/",
-  },
-];
+import { fetchProblems } from "../api/leetcode";
 
 const shuffle = (array) => {
   return [...array].sort(() => Math.random() - 0.5);
 };
 
 const Generate = () => {
+  const [allProblems, setAllProblems] = useState([]);
   const [generatedProblems, setGeneratedProblems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loadProblems = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await fetchProblems({
+          skip: 0,
+          limit: 100,
+        });
+
+        setAllProblems(data.data);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load problems");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProblems();
+  }, []);
 
   const handleGenerate = ({ easy, medium, hard, topics }) => {
-    let filtered = [...mockProblems];
+    let filtered = [...allProblems];
 
     if (topics.length > 0) {
       filtered = filtered.filter((problem) =>
-        topics.includes(problem.topic)
+        problem.topicTags.some((tag) =>
+          topics.includes(tag.name)
+        )
       );
     }
 
     const easyProblems = shuffle(
-      filtered.filter((problem) => problem.difficulty === "Easy")
+      filtered.filter(
+        (problem) => problem.difficulty === "Easy"
+      )
     ).slice(0, easy);
 
     const mediumProblems = shuffle(
-      filtered.filter((problem) => problem.difficulty === "Medium")
+      filtered.filter(
+        (problem) => problem.difficulty === "Medium"
+      )
     ).slice(0, medium);
 
     const hardProblems = shuffle(
-      filtered.filter((problem) => problem.difficulty === "Hard")
+      filtered.filter(
+        (problem) => problem.difficulty === "Hard"
+      )
     ).slice(0, hard);
 
-    const generated = shuffle([
+    const finalSheet = shuffle([
       ...easyProblems,
       ...mediumProblems,
       ...hardProblems,
-    ]);
+    ]).map((problem) => ({
+      ...problem,
+      id: problem.questionFrontendId,
+      topic:
+        problem.topicTags
+          .slice(0, 2)
+          .map((tag) => tag.name)
+          .join(", ") || "General",
+      link: `https://leetcode.com/problems/${problem.titleSlug}/`,
+    }));
 
-    setGeneratedProblems(generated);
+    setGeneratedProblems(finalSheet);
   };
 
   return (
@@ -142,8 +99,17 @@ const Generate = () => {
           </p>
         </div>
 
+        {error && (
+          <div className="mb-4 rounded-xl border border-red-900/50 bg-red-950/30 p-3 text-sm text-red-400">
+            {error}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[360px_1fr]">
-          <GenerateForm onGenerate={handleGenerate} />
+          <GenerateForm
+            onGenerate={handleGenerate}
+            disabled={loading}
+          />
 
           <GeneratedSheet problems={generatedProblems} />
         </div>
