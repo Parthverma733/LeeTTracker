@@ -1,4 +1,4 @@
-const API_URL = "http://leettracker-production-6e83.up.railway.app";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const fetchProblems = async ({
   skip = 0,
