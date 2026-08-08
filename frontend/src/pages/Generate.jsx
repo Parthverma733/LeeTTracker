@@ -85,27 +85,83 @@ const Generate = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="relative min-h-screen overflow-hidden bg-zinc-950 text-white">
       <Navbar />
 
-      <main className="mx-auto max-w-7xl px-6 py-6">
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold">
-            Generate
-          </h2>
+      {/* Background purple glow */}
+      <div
+        className="
+          pointer-events-none
+          absolute left-1/2 top-24
+          h-[420px] w-[420px]
+          -translate-x-1/2
+          rounded-full
+          bg-violet-600/10
+          blur-[140px]
+        "
+      />
 
-          <p className="mt-1 text-sm text-zinc-500">
-            Build a custom LeetCode practice sheet.
-          </p>
+      {/* Secondary glow */}
+      <div
+        className="
+          pointer-events-none
+          absolute -right-40 top-[420px]
+          h-[360px] w-[360px]
+          rounded-full
+          bg-indigo-500/[0.07]
+          blur-[130px]
+        "
+      />
+
+      <main className="relative z-10 mx-auto max-w-7xl px-6 py-8">
+        {/* Page heading */}
+        <div className="mb-7 flex items-end justify-between">
+          <div>
+            <div
+              className="
+                mb-3
+                inline-flex
+                rounded-full
+                border border-violet-500/20
+                bg-violet-500/10
+                px-3 py-1
+                text-xs font-medium
+                text-violet-300
+              "
+            >
+              Practice Generator
+            </div>
+
+            <h2 className="text-3xl font-semibold tracking-tight text-white">
+              Generate
+            </h2>
+
+            <p className="mt-2 text-sm text-zinc-500">
+              Build a custom LeetCode practice sheet.
+            </p>
+          </div>
         </div>
 
+        {/* Error */}
         {error && (
-          <div className="mb-4 rounded-xl border border-red-900/50 bg-red-950/30 p-3 text-sm text-red-400">
+          <div
+            className="
+              mb-5
+              rounded-xl
+              border border-red-500/20
+              bg-red-500/[0.07]
+              p-3
+              text-sm
+              text-red-400
+              shadow-[0_0_25px_rgba(239,68,68,0.05)]
+            "
+          >
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[360px_1fr]">
+        {/* Main content */}
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[360px_1fr]">
           <GenerateForm
             onGenerate={handleGenerate}
             disabled={loading}
